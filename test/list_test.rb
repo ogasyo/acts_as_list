@@ -34,7 +34,7 @@ class Mixin < ActiveRecord::Base
 end
 
 class ListMixin < Mixin
-  acts_as_list :column => "pos", :scope => [:parent, :project]
+  acts_as_list :column => "pos", :scope => [:parent_id, :project_id]
 
   def self.table_name() "mixins" end
 end
@@ -100,7 +100,7 @@ class ListTest < Test::Unit::TestCase
 
   def test_injection
     item = ListMixin.new(:parent_id => 1)
-    assert_equal "1 = 1 AND parent_id = 1 AND project_id IS NULL", item.scope_condition
+    assert_equal "1 = 1 AND parent_id = '1' AND project_id IS NULL", item.scope_condition
     assert_equal "pos", item.position_column
   end
 
@@ -285,7 +285,7 @@ class ListSubTest < Test::Unit::TestCase
 
   def test_injection
     item = ListMixin.new("parent_id"=>1)
-    assert_equal "1 = 1 AND parent_id = 1 AND project_id IS NULL", item.scope_condition
+    assert_equal "1 = 1 AND parent_id = '1' AND project_id IS NULL", item.scope_condition
     assert_equal "pos", item.position_column
   end
 

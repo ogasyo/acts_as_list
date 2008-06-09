@@ -26,11 +26,10 @@ module ActiveRecord
         # Configuration options are:
         #
         # * +column+ - specifies the column name to use for keeping the position integer (default: +position+)
-        # * +scope+ - restricts what is to be considered a list. Given a symbol, it'll attach <tt>_id</tt> 
-        #   (if it hasn't already been added) and use that as the foreign key restriction. It's also possible 
-        #   to give it an entire string that is interpolated if you need a tighter scope than just a foreign key.
+        # * +scope+ - restricts what is to be considered a list. Given a symbol, it'll use that as the foreign key restriction. 
+        #   It's also possible to give it an entire string that is interpolated if you need a tighter scope than just a foreign key.
         #   Example: <tt>acts_as_list :scope => 'todo_list_id = #{todo_list_id} AND completed = 0'</tt>. You may
-        #   also pass an array to define multiple scopes. Example: <tt>acts_as_list :scope => [:todo_list, :project]</tt>
+        #   also pass an array to define multiple scopes. Example: <tt>acts_as_list :scope => [:todo_list_id, :project_id]</tt>
         def acts_as_list(options = {})
           configuration = { :column => "position", :scope => "1 = 1" }
           configuration.update(options) if options.is_a?(Hash)
@@ -39,8 +38,7 @@ module ActiveRecord
 					configuration[:scope] = [configuration[:scope]] unless configuration[:scope].is_a?(Array)
 					configuration[:scope].each do |scope|
 						if scope.is_a?(Symbol)
-							scope = "#{scope}_id" if scope.to_s !~ /_id$/
-							scope_condition_method += %(condition += ' AND ' + (#{scope.to_s}.nil? ? "#{scope.to_s} IS NULL" : "#{scope.to_s} = \#{send(:#{scope.to_s})}"); )
+							scope_condition_method += %(condition += ' AND ' + (#{scope.to_s}.nil? ? "#{scope.to_s} IS NULL" : "#{scope.to_s} = '\#{send(:#{scope.to_s})}'"); )
 						else
 							scope_condition_method += %(condition += " AND #{scope}"; )
 						end
