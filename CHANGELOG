@@ -1,0 +1,4 @@
+2008-06-09 - Sean Huber (shuber@huberry.com)
+	* Removed TextMate paths from $: to avoid builder conflicts
+	* Silenced output for ActiveRecord schema definitions in tests
+	* Added support for multiple scopes

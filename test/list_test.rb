@@ -1,3 +1,4 @@
+$:.reject! { |path| path.include? 'TextMate' }
 require 'test/unit'
 
 require 'rubygems'
@@ -9,14 +10,17 @@ require "#{File.dirname(__FILE__)}/../init"
 ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :dbfile => ":memory:")
 
 def setup_db
-  ActiveRecord::Schema.define(:version => 1) do
-    create_table :mixins do |t|
-      t.column :pos, :integer
-      t.column :parent_id, :integer
-      t.column :created_at, :datetime      
-      t.column :updated_at, :datetime
-    end
-  end
+	silence_stream STDOUT do
+	  ActiveRecord::Schema.define(:version => 1) do
+	    create_table :mixins do |t|
+	      t.column :pos, :integer
+	      t.column :parent_id, :integer
+				t.column :project_id, :integer
+	      t.column :created_at, :datetime      
+	      t.column :updated_at, :datetime
+	    end
+	  end
+	end
 end
 
 def teardown_db
@@ -29,7 +33,7 @@ class Mixin < ActiveRecord::Base
 end
 
 class ListMixin < Mixin
-  acts_as_list :column => "pos", :scope => :parent
+  acts_as_list :column => "pos", :scope => [:parent, :project]
 
   def self.table_name() "mixins" end
 end
@@ -95,7 +99,7 @@ class ListTest < Test::Unit::TestCase
 
   def test_injection
     item = ListMixin.new(:parent_id => 1)
-    assert_equal "parent_id = 1", item.scope_condition
+    assert_equal "1 = 1 AND parent_id = 1 AND project_id IS NULL", item.scope_condition
     assert_equal "pos", item.position_column
   end
 
@@ -271,7 +275,7 @@ class ListSubTest < Test::Unit::TestCase
 
   def test_injection
     item = ListMixin.new("parent_id"=>1)
-    assert_equal "parent_id = 1", item.scope_condition
+    assert_equal "1 = 1 AND parent_id = 1 AND project_id IS NULL", item.scope_condition
     assert_equal "pos", item.position_column
   end
 

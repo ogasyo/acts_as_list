@@ -34,21 +34,17 @@ module ActiveRecord
           configuration = { :column => "position", :scope => "1 = 1" }
           configuration.update(options) if options.is_a?(Hash)
 
-          configuration[:scope] = "#{configuration[:scope]}_id".intern if configuration[:scope].is_a?(Symbol) && configuration[:scope].to_s !~ /_id$/
-
-          if configuration[:scope].is_a?(Symbol)
-            scope_condition_method = %(
-              def scope_condition
-                if #{configuration[:scope].to_s}.nil?
-                  "#{configuration[:scope].to_s} IS NULL"
-                else
-                  "#{configuration[:scope].to_s} = \#{#{configuration[:scope].to_s}}"
-                end
-              end
-            )
-          else
-            scope_condition_method = "def scope_condition() \"#{configuration[:scope]}\" end"
-          end
+					scope_condition_method = 'def scope_condition; condition = "1 = 1"; '
+					configuration[:scope] = [configuration[:scope]] unless configuration[:scope].is_a?(Array)
+					configuration[:scope].each do |scope|
+						if scope.is_a?(Symbol)
+							scope = "#{scope}_id".to_sym if scope.is_a?(Symbol) && scope.to_s !~ /_id$/
+							scope_condition_method += %(condition += ' AND ' + (#{scope.to_s}.nil? ? "#{scope.to_s} IS NULL" : "#{scope.to_s} = \#{send(:#{scope.to_s})}"); )
+						else
+							scope_condition_method += %(condition += " AND #{scope}"; )
+						end
+					end
+					scope_condition_method += 'condition; end'
 
           class_eval <<-EOV
             include ActiveRecord::Acts::List::InstanceMethods
