@@ -16,6 +16,7 @@ def setup_db
 	      t.column :pos, :integer
 	      t.column :parent_id, :integer
 				t.column :project_id, :integer
+				t.column :completed, :integer, :limit => 1, :default => 0
 	      t.column :created_at, :datetime      
 	      t.column :updated_at, :datetime
 	    end
@@ -224,6 +225,15 @@ class ListTest < Test::Unit::TestCase
     assert_equal 2, ListMixin.find(3).pos
     assert_equal 3, ListMixin.find(4).pos
   end 
+
+	def test_multiple_scopes
+		new = ListMixin.create :parent_id => 1, :project_id => 1
+		new2 = ListMixin.create :parent_id => 1, :project_id => 1
+		new3 = ListMixin.create :parent_id => 1, :project_id => 2
+		assert_equal 1, new.pos
+		assert_equal 2, new2.pos
+		assert_equal 1, new3.pos
+	end
   
 end
 
