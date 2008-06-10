@@ -1,11 +1,14 @@
-2008-06-09 - Sean Huber (shuber@einsteinindustries.com)
-  * Scope condition properly quotes foreign key values (e.g "parent_id = '1'")
-  * Removed logic that converts scopes that are belongs_to symbols into foreign keys. This will require you to specifically pass the foreign key as a symbol now (e.g. :parent_id instead of :parent) which allows to scope to fields like :type
-  * Updated documentation
+2008-06-09 - Sean Huber (shuber@huberry.com)
+	* Updated CHANGELOG emails
 
-2008-06-09 - Sean Huber (shuber@einsteinindustries.com)
-  * Added more tests
-  * Updated documentation
+2008-06-09 - Sean Huber (shuber@huberry.com)
+	* Scope condition properly quotes foreign key values (e.g "parent_id = '1'")
+	* Removed logic that converts scopes that are belongs_to symbols into foreign keys. This will require you to specifically pass the foreign key as a symbol now (e.g. :parent_id instead of :parent) which allows to scope to fields like :type
+	* Updated documentation
+
+2008-06-09 - Sean Huber (shuber@huberry.com)
+	* Added more tests
+	* Updated documentation
 
 2008-06-09 - Sean Huber (shuber@huberry.com)
 	* Removed TextMate paths from $: for tests to avoid builder conflicts
