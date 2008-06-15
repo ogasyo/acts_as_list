@@ -39,6 +39,19 @@ module ActiveRecord
 					configuration[:scope].each do |scope|
 						if scope.is_a?(Symbol)
 							scope_condition_method += %(condition += ' AND ' + (#{scope.to_s}.nil? ? "#{scope.to_s} IS NULL" : "#{scope.to_s} = '\#{send(:#{scope.to_s})}'"); )
+							
+							define_method "#{scope}=" do |value|
+								if new_record?
+									super(value)
+								else
+									unless value == send(scope)
+										remove_from_list
+										super(value)
+										add_to_list_bottom
+										save
+									end
+								end
+							end
 						else
 							scope_condition_method += %(condition += " AND #{scope}"; )
 						end

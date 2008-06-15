@@ -234,6 +234,28 @@ class ListTest < Test::Unit::TestCase
 		assert_equal 2, new2.pos
 		assert_equal 1, new3.pos
 	end
+	
+	def test_should_switch_lists_on_scope_change
+		new = ListMixin.create :parent_id => 1, :project_id => 1
+		new2 = ListMixin.create :parent_id => 1, :project_id => 1
+		new3 = ListMixin.create :parent_id => 1, :project_id => 1
+		
+		new2.parent_id = 2
+		
+		new.reload
+		new2.reload
+		new3.reload
+		
+		new3.project_id = 2
+
+		new.reload
+		new2.reload
+		new3.reload
+		
+		assert_equal 1, new.pos
+		assert_equal 1, new2.pos
+		assert_equal 1, new3.pos
+	end
   
 end
 
