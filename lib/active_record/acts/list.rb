@@ -48,7 +48,6 @@ module ActiveRecord
 										remove_from_list
 										super(value)
 										add_to_list_bottom
-										save
 									end
 								end
 							end

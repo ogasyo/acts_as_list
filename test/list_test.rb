@@ -241,12 +241,14 @@ class ListTest < Test::Unit::TestCase
 		new3 = ListMixin.create :parent_id => 1, :project_id => 1
 		
 		new2.parent_id = 2
+		new2.save
 		
 		new.reload
 		new2.reload
 		new3.reload
 		
 		new3.project_id = 2
+		new3.save
 
 		new.reload
 		new2.reload
