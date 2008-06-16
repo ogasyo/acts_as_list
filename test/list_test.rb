@@ -273,6 +273,11 @@ class ListTest < Test::Unit::TestCase
 		assert_equal 1, new3.pos
 		assert_equal 2, new2.pos
 	end
+	
+	def test_scope_changed_should_return_false_if_new_record
+		new = ListMixin.create :parent_id => 1, :project_id => 1
+		assert !new.send(:scope_changed?)
+	end
   
 end
 

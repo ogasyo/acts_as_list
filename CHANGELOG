@@ -1,4 +1,7 @@
 2008-06-16 - Sean Huber (shuber@huberry.com)
+	* scope_changed? returns false if new_record?
+
+2008-06-16 - Sean Huber (shuber@huberry.com)
 	* When a record's scope changes, a call to add_to_list_bottom is not made until the record is saved
 
 2008-06-15 - Sean Huber (shuber@huberry.com)

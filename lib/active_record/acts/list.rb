@@ -260,7 +260,7 @@ module ActiveRecord
           end
 
 					def scope_changed?
-						!!@scope_changed
+						!!@scope_changed && !new_record?
 					end
       end 
     end
