@@ -47,7 +47,7 @@ module ActiveRecord
 									unless value == send(scope)
 										remove_from_list
 										super(value)
-										add_to_list_bottom
+										@scope_changed = true
 									end
 								end
 							end
@@ -72,6 +72,7 @@ module ActiveRecord
 
             before_destroy :remove_from_list
             before_create  :add_to_list_bottom
+						before_save		 :add_to_list_bottom, :if => :scope_changed?
           EOV
         end
       end
@@ -257,6 +258,10 @@ module ActiveRecord
             increment_positions_on_lower_items(position)
             self.update_attribute(position_column, position)
           end
+
+					def scope_changed?
+						!!@scope_changed
+					end
       end 
     end
   end

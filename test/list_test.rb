@@ -258,6 +258,21 @@ class ListTest < Test::Unit::TestCase
 		assert_equal 1, new2.pos
 		assert_equal 1, new3.pos
 	end
+	
+	def test_should_not_switch_lists_on_scope_change_until_record_is_saved
+		new = ListMixin.create :parent_id => 1, :project_id => 1
+		new2 = ListMixin.create :parent_id => 1, :project_id => 1
+		new3 = ListMixin.create :parent_id => 1, :project_id => 1
+		
+		new2.parent_id = 2
+		new3.parent_id = 2
+		
+		new3.save
+		new2.save
+		
+		assert_equal 1, new3.pos
+		assert_equal 2, new2.pos
+	end
   
 end
 
