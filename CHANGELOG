@@ -1,3 +1,6 @@
+2008-06-30 - Sean Huber (shuber@huberry.com)
+	* Changed add_to_list_bottom, :if => :scope_changed? callback to be compatible with older active_record versions
+
 2008-06-16 - Sean Huber (shuber@huberry.com)
 	* scope_changed? returns false if new_record?
 

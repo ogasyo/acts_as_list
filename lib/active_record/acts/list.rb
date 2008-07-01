@@ -72,7 +72,7 @@ module ActiveRecord
 
             before_destroy :remove_from_list
             before_create  :add_to_list_bottom
-						before_save		 :add_to_list_bottom, :if => :scope_changed?
+						before_save		 :add_to_list_bottom_if_scope_changed
           EOV
         end
       end
@@ -188,6 +188,10 @@ module ActiveRecord
           def add_to_list_bottom
             self[position_column] = bottom_position_in_list.to_i + 1
           end
+
+					def add_to_list_bottom_if_scope_changed
+						add_to_list_bottom if scope_changed?
+					end
 
           # Overwrite this method to define the scope of the list changes
           def scope_condition() "1" end
