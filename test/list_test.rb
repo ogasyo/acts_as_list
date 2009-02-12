@@ -10,18 +10,18 @@ require "#{File.dirname(__FILE__)}/../init"
 ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :dbfile => ":memory:")
 
 def setup_db
-	silence_stream STDOUT do
-	  ActiveRecord::Schema.define(:version => 1) do
-	    create_table :mixins do |t|
-	      t.column :pos, :integer
-	      t.column :parent_id, :integer
-				t.column :project_id, :integer
-				t.column :completed, :integer, :limit => 1, :default => 0
-	      t.column :created_at, :datetime      
-	      t.column :updated_at, :datetime
-	    end
-	  end
-	end
+  silence_stream STDOUT do
+    ActiveRecord::Schema.define(:version => 1) do
+      create_table :mixins do |t|
+        t.column :pos, :integer
+        t.column :parent_id, :integer
+        t.column :project_id, :integer
+        t.column :completed, :integer, :limit => 1, :default => 0
+        t.column :created_at, :datetime      
+        t.column :updated_at, :datetime
+      end
+    end
+  end
 end
 
 def teardown_db
@@ -226,59 +226,96 @@ class ListTest < Test::Unit::TestCase
     assert_equal 3, ListMixin.find(4).pos
   end 
 
-	def test_multiple_scopes
-		new = ListMixin.create :parent_id => 1, :project_id => 1
-		new2 = ListMixin.create :parent_id => 1, :project_id => 1
-		new3 = ListMixin.create :parent_id => 1, :project_id => 2
-		assert_equal 1, new.pos
-		assert_equal 2, new2.pos
-		assert_equal 1, new3.pos
-	end
-	
-	def test_should_switch_lists_on_scope_change
-		new = ListMixin.create :parent_id => 1, :project_id => 1
-		new2 = ListMixin.create :parent_id => 1, :project_id => 1
-		new3 = ListMixin.create :parent_id => 1, :project_id => 1
-		
-		new2.parent_id = 2
-		new2.save
-		
-		new.reload
-		new2.reload
-		new3.reload
-		
-		new3.project_id = 2
-		new3.save
-
-		new.reload
-		new2.reload
-		new3.reload
-		
-		assert_equal 1, new.pos
-		assert_equal 1, new2.pos
-		assert_equal 1, new3.pos
-	end
-	
-	def test_should_not_switch_lists_on_scope_change_until_record_is_saved
-		new = ListMixin.create :parent_id => 1, :project_id => 1
-		new2 = ListMixin.create :parent_id => 1, :project_id => 1
-		new3 = ListMixin.create :parent_id => 1, :project_id => 1
-		
-		new2.parent_id = 2
-		new3.parent_id = 2
-		
-		new3.save
-		new2.save
-		
-		assert_equal 1, new3.pos
-		assert_equal 2, new2.pos
-	end
-	
-	def test_scope_changed_should_return_false_if_new_record
-		new = ListMixin.create :parent_id => 1, :project_id => 1
-		assert !new.send(:scope_changed?)
-	end
+  def test_multiple_scopes
+    new = ListMixin.create :parent_id => 1, :project_id => 1
+    new2 = ListMixin.create :parent_id => 1, :project_id => 1
+    new3 = ListMixin.create :parent_id => 1, :project_id => 2
+    assert_equal 1, new.pos
+    assert_equal 2, new2.pos
+    assert_equal 1, new3.pos
+  end
   
+  def test_should_switch_lists_on_scope_change
+    new = ListMixin.create :parent_id => 1, :project_id => 1
+    new2 = ListMixin.create :parent_id => 1, :project_id => 1
+    new3 = ListMixin.create :parent_id => 1, :project_id => 1
+    
+    new2.parent_id = 2
+    new2.save
+    
+    new.reload
+    new2.reload
+    new3.reload
+    
+    new3.project_id = 2
+    new3.save
+
+    new.reload
+    new2.reload
+    new3.reload
+    
+    assert_equal 1, new.pos
+    assert_equal 1, new2.pos
+    assert_equal 1, new3.pos
+  end
+  
+  def test_should_not_switch_lists_on_scope_change_until_record_is_saved
+    new = ListMixin.create :parent_id => 1, :project_id => 1
+    new2 = ListMixin.create :parent_id => 1, :project_id => 1
+    new3 = ListMixin.create :parent_id => 1, :project_id => 1
+    
+    new2.parent_id = 2
+    new3.parent_id = 2
+    
+    new3.save
+    new2.save
+    
+    assert_equal 1, new3.pos
+    assert_equal 2, new2.pos
+  end
+  
+  def test_scope_changed_should_return_false_if_new_record
+    new = ListMixin.create :parent_id => 1, :project_id => 1
+    assert !new.send(:scope_changed?)
+  end
+
+  def test_delete_middle_with_holes
+    # first we check everything is at expected place
+    assert_equal [1, 2, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
+
+    # then we create a hole in the list, say you're working with existing data in which you already have holes
+    # or your scope is very complex
+    ListMixin.delete(2)
+
+    # we ensure the hole is really here
+    assert_equal [1, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
+    assert_equal 1, ListMixin.find(1).pos
+    assert_equal 3, ListMixin.find(3).pos
+    assert_equal 4, ListMixin.find(4).pos
+
+    # can we retrieve lower item despite the hole?
+    assert_equal 3, ListMixin.find(1).lower_item.id
+
+    # can we move an item lower jumping more than one position?
+    ListMixin.find(1).move_lower
+    assert_equal [3, 1, 4], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
+    assert_equal 2, ListMixin.find(3).pos
+    assert_equal 3, ListMixin.find(1).pos
+    assert_equal 4, ListMixin.find(4).pos
+
+    # create another hole
+    ListMixin.delete(1)
+
+    # can we retrieve higher item despite the hole?
+    assert_equal 3, ListMixin.find(4).higher_item.id
+
+    # can we move an item higher jumping more than one position?
+    ListMixin.find(4).move_higher
+    assert_equal [4, 3], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
+    assert_equal 2, ListMixin.find(4).pos
+    assert_equal 3, ListMixin.find(3).pos
+  end
+
 end
 
 class ListSubTest < Test::Unit::TestCase
