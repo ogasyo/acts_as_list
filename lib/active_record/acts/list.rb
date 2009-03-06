@@ -44,7 +44,7 @@ module ActiveRecord
                 if new_record?
                   super(value)
                 else
-                  unless value == send(scope)
+                  unless value.to_s == send(scope).to_s
                     remove_from_list
                     super(value)
                     @scope_changed = true
