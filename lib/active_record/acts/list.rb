@@ -163,7 +163,7 @@ module ActiveRecord
         def higher_item
           return nil unless in_list?
           acts_as_list_class.find(:first, :conditions =>
-            "#{scope_condition} AND #{position_column} < #{send(position_column).to_s}", :order => "#{position_column} DESC"
+            "#{scope_condition} AND #{position_column} < #{send(position_column).to_s}", :order => "#{acts_as_list_class.table_name}.#{position_column} DESC"
           )
         end
 
@@ -171,7 +171,7 @@ module ActiveRecord
         def lower_item
           return nil unless in_list?
           acts_as_list_class.find(:first, :conditions =>
-            "#{scope_condition} AND #{position_column} > #{send(position_column).to_s}", :order => "#{position_column} ASC"
+            "#{scope_condition} AND #{position_column} > #{send(position_column).to_s}", :order => "#{acts_as_list_class.table_name}.#{position_column} ASC"
           )
         end
 
@@ -207,7 +207,7 @@ module ActiveRecord
           def bottom_item(except = nil)
             conditions = scope_condition
             conditions = "#{conditions} AND #{self.class.primary_key} != #{except.id}" if except
-            acts_as_list_class.find(:first, :conditions => conditions, :order => "#{position_column} DESC")
+            acts_as_list_class.find(:first, :conditions => conditions, :order => "#{acts_as_list_class.table_name}.#{position_column} DESC")
           end
 
           # Forces item to assume the bottom position in the list.
